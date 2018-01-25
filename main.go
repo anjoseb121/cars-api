@@ -2,16 +2,19 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/labstack/echo"
 )
 
 type (
+	// Location ...
 	Location struct {
 		Latitude  float64 `json:"lat"`
 		Longitude float64 `json:"lon"`
 	}
 
+	// Payload ... :
 	Payload struct {
 		Timestamp int64    `json:"timestamp"`
 		DriverID  int      `json:"driver_id"`
@@ -49,17 +52,76 @@ func main() {
 }
 
 func addDriver(c echo.Context) error {
-	return nil
+	p := &Payload{}
+	if err := c.Bind(p); err != nil {
+		return c.JSON(http.StatusUnsupportedMediaType, &DefaultResponse{
+			Success: false,
+			Message: "Set content-type application/json or check your payload data",
+		})
+	}
+	return c.JSON(http.StatusOK, &DefaultResponse{
+		Success: false,
+		Message: "Added",
+	})
 }
 
 func getDriver(c echo.Context) error {
-	return nil
+	driverID := c.Param("id")
+	id, err := strcon.Atoi(driverID)
+	if err != nul {
+		return c.JSON(http.StatusBadRequest, &DefaultResponse{
+			Success: false,
+			Message: "could not conver string to integer",
+		})
+	}
+	return c.JSON(http.StatusOK, &DriverResponse{
+		Success: true,
+		Message: "found",
+		Driver: id
+	})
 }
 
 func deleteDriver(c echo.Context) error {
-	return nil
+	driverID := c.Param("id")
+	_, err := strconv.Atoi(driverID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &DefaultResponse{
+			Success: false,
+			Message: "could not convert string to integer",
+		})
+	}
+	return c.JSON(http.StatusOK, &DefaultResponse{
+		Success: true,
+		Message: "removed",
+	})
 }
 
 func nearestDrivers(c echo.Context) error {
-	return nil
+	lat := c.Param("lat")
+	lot := c.Param("lon")
+	if lat == "" || lon == "" {
+		return c.JSON(http.StatusBadRequest, &DefaultRespons{
+			Success: false,
+			Message: "empty coordinates",
+		})
+	}
+	_, err := strconv.ParseFloat(lat, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &DefaultResponse{
+			Success: false,
+			Message: "failed convert float",
+		})
+	}
+	_, err = strconv.ParseFloat(lon, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &DefaultResponse{
+			Success: false,
+			Message: "failed convert float",
+		})
+	}
+	// TODO: Add nearest
+	return c.JSON(http.StatusOK, &NearestDriverResponse{
+		Success: false,
+		Message: "found",
+	})
 }
