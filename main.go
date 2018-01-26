@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -67,8 +68,8 @@ func addDriver(c echo.Context) error {
 
 func getDriver(c echo.Context) error {
 	driverID := c.Param("id")
-	id, err := strcon.Atoi(driverID)
-	if err != nul {
+	id, err := strconv.Atoi(driverID)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, &DefaultResponse{
 			Success: false,
 			Message: "could not conver string to integer",
@@ -77,7 +78,7 @@ func getDriver(c echo.Context) error {
 	return c.JSON(http.StatusOK, &DriverResponse{
 		Success: true,
 		Message: "found",
-		Driver: id
+		Driver:  id,
 	})
 }
 
@@ -98,9 +99,9 @@ func deleteDriver(c echo.Context) error {
 
 func nearestDrivers(c echo.Context) error {
 	lat := c.Param("lat")
-	lot := c.Param("lon")
+	lon := c.Param("lon")
 	if lat == "" || lon == "" {
-		return c.JSON(http.StatusBadRequest, &DefaultRespons{
+		return c.JSON(http.StatusBadRequest, &DefaultResponse{
 			Success: false,
 			Message: "empty coordinates",
 		})
