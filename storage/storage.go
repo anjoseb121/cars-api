@@ -1,6 +1,9 @@
 package storage
 
-import "errors"
+import (
+	"errors"
+	"math"
+)
 
 type (
 
@@ -29,13 +32,13 @@ func New() *DriverStorage {
 }
 
 // Set sets driver to storage by key
-func (d *DriverStorage) Set(key int, drive *Driver) {
+func (d *DriverStorage) Set(key int, driver *Driver) {
 	d.drivers[key] = driver
 }
 
 // Delete removes driver from storage by key
 func (d *DriverStorage) Delete(key int) error {
-	driver, ok := d.drivers[key]
+	_, ok := d.drivers[key]
 	if !ok {
 		return errors.New("Driver does not exist")
 	}
@@ -53,6 +56,34 @@ func (d *DriverStorage) Get(key int) (*Driver, error) {
 }
 
 // Nearest returns nearest drivers by location
-func (d *DriverStorage) Nearest(lat, lon float64) ([]*Driver, error) {
+func (d *DriverStorage) Nearest(radius, lat, lon float64) ([]*Driver, error) {
 	return nil, nil
+}
+
+// haversin(0) function
+func hsin(theta float64) float64 {
+	return math.Pow(math.Sin(theta/2), 2)
+}
+
+// Distance function returns the distance in meters between two points of
+// a fiven longitude and latitude relatively accurately (using a spherical
+// approximation of the Earth) through the haversin distance formula for
+// great arc distance on a sphere with accuracy for small distances
+//
+// point coordinates are supplied in degrees and converted into rad. in the func
+//
+// distance returned is meters
+// http://en.wikipedia.org/wiki/Haversine_formula
+func Distance(lat1, lon1, lat2, lon2 float64) float64 {
+	// conert to radinas
+	// must cast radius as float to multiply later
+	var la1, lo1, la2, lo2, r float64
+	la1 = lat1 * math.Pi / 180
+	lo1 = lon1 * math.Pi / 180
+	la2 = lat2 * math.Pi / 180
+	lo2 = lon2 * math.Pi / 180
+	r = 6378100
+	// calculate
+	h := hsin(la2-la1) + math.Cos(la1)*math.Cos(la2)*hsin(lo2-lo1)
+	return 2 * r * math.Asin(math.Sqrt(h))
 }
