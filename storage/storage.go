@@ -56,8 +56,15 @@ func (d *DriverStorage) Get(key int) (*Driver, error) {
 }
 
 // Nearest returns nearest drivers by location
-func (d *DriverStorage) Nearest(radius, lat, lon float64) ([]*Driver, error) {
-	return nil, nil
+func (d *DriverStorage) Nearest(radius, lat, lon float64) []*Driver {
+	var result []*Driver
+	for _, driver := range d.drivers {
+		distance := Distance(lat, lon, driver.LastLocation.Lat, driver.LastLocation.Lon)
+		if distance <= radius {
+			result = append(result, driver)
+		}
+	}
+	return result
 }
 
 // haversin(0) function
