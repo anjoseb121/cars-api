@@ -3,6 +3,8 @@ package storage
 import (
 	"errors"
 	"math"
+	"sync"
+	"time"
 
 	"github.com/dhconnelly/rtreego"
 )
@@ -18,13 +20,17 @@ type (
 	Driver struct {
 		ID           int
 		LastLocation Location
+		Expiration   int64
+		Locations    *lru.LRU
 	}
 )
 
 // DriverStorage is main storage for our project
 type DriverStorage struct {
+	mu        *sync.RWMutex // to sync
 	drivers   map[int]*Driver
 	locations *rtreego.Rtree
+	lruSize   int // In order to initialize the storage for each driver
 }
 
 // Bounds method needs for correct working of rtree
@@ -119,4 +125,12 @@ func Distance(lat1, lon1, lat2, lon2 float64) float64 {
 	// calculate
 	h := hsin(la2-la1) + math.Cos(la1)*math.Cos(la2)*hsin(lo2-lo1)
 	return 2 * r * math.Asin(math.Sqrt(h))
+}
+
+// Expired returns true if the item has expired.
+func (d *Driver) Expired() bool {
+	if d.Expiration == 0 {
+		return false
+	}
+	return time.Now().UnixNano() > d.Expiration
 }
